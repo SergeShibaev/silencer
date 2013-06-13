@@ -9,19 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * User: SergeShibaev
+ * User: Serge Shibaev
  * Date: 11.06.13
  * Time: 18:25
  */
 public class BroadcastManager extends BroadcastReceiver {
     private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
     private final Validator validator = new Validator(Silencer.context);
-    private Logger logger = Silencer.logger;
+    private Logger logger = SilencerActivity.logger;
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (intent == null || intent.getAction() == null || ACTION.compareToIgnoreCase(intent.getAction()) == 0) {
+        if (intent == null || intent.getExtras() == null/* || ACTION.compareToIgnoreCase(intent.getAction()) == 0*/) {
             return;
         }
         Object[] pduArray = (Object[]) intent.getExtras().get("pdus");
@@ -36,11 +36,9 @@ public class BroadcastManager extends BroadcastReceiver {
 
         String sender = messages.get(0).getDisplayOriginatingAddress();
         if (!validator.isValidNumber(sender)) {
-            logger.AddLog("SMS from [" + sender + "] was blocked");
             this.abortBroadcast();
-        }
-        else {
-            logger.AddLog("SMS from [" + sender + "] passed");      // DEBUG purpose only! Should be removed!
+            logger.AddLog("SMS from [" + sender + "] was blocked. Reason: " + validator.getReason());
+            logger.ShowLog();
         }
     }
 }

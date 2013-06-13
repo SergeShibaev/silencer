@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: Serge Shibaev
@@ -13,22 +15,33 @@ import java.util.Calendar;
  * Time: 18:53
  */
 public class Validator {
-    private static final String[] blackList = { "^\\+372(.*)", "^\\+282(.)", "^01177(.*)" };
-    private Context context;
+    private static final String[] blackList = { "^\\+372(.*)"/*, "^\\+282(.*)", "^01177(.*)"*/ };
+    private static Context context;
+    private String reason = "";
+    private Map<String, Integer> silenceTime = new HashMap<String, Integer>();
 
     public Validator(Context baseContext) {
         this.context = baseContext;
+        silenceTime.put("start", 0);
+        silenceTime.put("finish", 9);
+        isTestsPassed();
     }
 
-    public void RunTests() {
-        String goodNumber = "+79223685980";
+    public String getReason() {
+        return reason;
+    }
+
+    private boolean isTestsPassed() {
+        String goodNumber = "+79223456789";
         String evilNumber = "+37212345678";
-        String fromСanada = "011773333";
-        boolean isValid = true;
-        isValid = isValid && !isValidNumber(null);  // check undefined numbers
-        isValid = isValid &&  isValidNumber(goodNumber);
-        isValid = isValid && !isValidNumber(evilNumber);
-        isValid = isValid && !isValidNumber(fromСanada);
+        String textName = "Home";
+        boolean passed = true;
+        passed = passed && !isValidNumber(null);  // check undefined numbers
+        passed = passed &&  isValidNumber(goodNumber);
+        passed = passed && !isValidNumber(evilNumber);
+        passed = passed && isValidNumber(textName);
+
+        return passed;
     }
 
     private boolean isBlack(String incomingNumber) {
@@ -41,7 +54,7 @@ public class Validator {
         return false;
     }
 
-    private boolean isKnown(String incomingNumber) {
+    private static boolean isKnown(String incomingNumber) {
         boolean result = false;
 
         ContentResolver cr = context.getContentResolver();
@@ -60,12 +73,25 @@ public class Validator {
 
     private boolean isSilenceTime() {
         Calendar calendar = Calendar.getInstance();
-        int curHour = calendar.get(Calendar.HOUR);
+        int curHour = calendar.get(Calendar.HOUR_OF_DAY);
 
-        return (curHour >= 0 && curHour <= 9);
+        return (curHour >= silenceTime.get("start") && curHour <= silenceTime.get("finish"));
     }
 
     public boolean isValidNumber(String incomingNumber) {
-        return (incomingNumber != null && !isBlack(incomingNumber) && (!isSilenceTime() || isKnown(incomingNumber)));
+        if (incomingNumber == null) {
+            reason = "Undefined caller";
+            return false;
+        }
+        if (isBlack(incomingNumber)) {
+            reason = "Number from blacklist";
+            return false;
+        }
+        if (isSilenceTime() && !isKnown(incomingNumber)) {
+            reason = "Unknown caller refused in Silence time";
+            return false;
+        }
+
+        return true;
     }
 }

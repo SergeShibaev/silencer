@@ -1,9 +1,6 @@
 package com.Silencer;
 
-import android.R;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -19,10 +16,10 @@ public class Silencer extends Service {
 
     private TelephonyManager tm;
     private NotificationManager nm;
-    private Notifyer notifyer = new Notifyer();
-    public static Context context;
+    //private Notifyer notifyer = new Notifyer();
     private Validator validator;
-    public static Logger logger;
+    private Logger logger = SilencerActivity.logger;
+    public static Context context;
 
     public IBinder onBind(Intent intent) {
         return null;
@@ -35,9 +32,7 @@ public class Silencer extends Service {
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         context = getBaseContext();
-        logger  = new Logger(this.context);
-        validator = new Validator(this.context);
-        logger.AddLog("Silencer was born");
+        validator = new Validator(context);
     }
 
     public void onDestroy() {
@@ -56,7 +51,7 @@ public class Silencer extends Service {
         return super.onStartCommand(intent, flags,  startid);
     }
 
-    private void SendNotification(String message) {
+    /*private void SendNotification(String message) {
         notifyer.add(message);
 
         Notification notification = new Notification(R.drawable.ic_menu_delete, message, System.currentTimeMillis());
@@ -69,7 +64,7 @@ public class Silencer extends Service {
         notification.number = notifyer.getUnreaded();
 
         nm.notify(1, notification);
-    }
+    }*/
 
     private PhoneStateListener mPhoneListener = new PhoneStateListener() {
         private int cntRings = 0;
@@ -102,10 +97,11 @@ public class Silencer extends Service {
                             if (incomingNumber == null) {
                                 incomingNumber = "undefined";
                             }
-                            SendNotification("Caller was blocked: " + incomingNumber);
+                            String message = "Caller [" + incomingNumber + "] was blocked. Reason: " + validator.getReason();
+                            //SendNotification(message);
 
-                            String message = "Number [" + incomingNumber + "] was blocked";
                             logger.AddLog(message);
+                            logger.ShowLog();
                         }
 
                         break;
