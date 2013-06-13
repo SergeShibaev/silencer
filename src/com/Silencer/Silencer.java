@@ -1,42 +1,52 @@
 package com.Silencer;
 
-import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
+import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 import com.android.internal.telephony.ITelephony;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Silencer extends Service {
 
     private TelephonyManager tm;
-    private NotificationManager nm;
+    //private NotificationManager nm;
     //private Notifyer notifyer = new Notifyer();
-    private Validator validator;
+    private Validator validator = new Validator();
     private Logger logger = SilencerActivity.logger;
-    public static Context context;
+    public static boolean isActive = false;
 
     public IBinder onBind(Intent intent) {
         return null;
     }
 
     public void onCreate() {
+        isActive = true;
         super.onCreate();
-        Toast.makeText(this, "Silencer was born", Toast.LENGTH_SHORT).show();
         tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        context = getBaseContext();
-        validator = new Validator(context);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+        filter.setPriority(1000);
+        registerReceiver(mSMSReceiver, filter);
+
+        //nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        validator.setSilenceTime(0, 9);
     }
 
     public void onDestroy() {
+        isActive = false;
         super.onDestroy();
+        unregisterReceiver(mSMSReceiver);
         Toast.makeText(this, "Silencer is OFF", Toast.LENGTH_SHORT).show();
     }
 
@@ -92,7 +102,7 @@ public class Silencer extends Service {
                         }
                         ++cntRings;
 
-                        if (!validator.isValidNumber(incomingNumber)) {
+                        if (isActive && !validator.isValidNumber(incomingNumber)) {
                             endCall();
                             if (incomingNumber == null) {
                                 incomingNumber = "undefined";
@@ -116,6 +126,36 @@ public class Silencer extends Service {
             }
             catch (Exception e) {
                 logger.AddLog("PhoneStateListener: " + e);
+            }
+        }
+    };
+
+    private BroadcastReceiver mSMSReceiver = new BroadcastReceiver() {
+
+        private Validator validator = new Validator();
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            validator.setSilenceTime(100, 100);     // no Silence Time for SMS
+
+            if (intent == null || intent.getExtras() == null) {
+                return;
+            }
+            Object[] pduArray = (Object[]) intent.getExtras().get("pdus");
+            if (pduArray.length == 0) {
+                return;
+            }
+
+            List<SmsMessage> messages = new ArrayList<SmsMessage>();
+            for (int i = 0; i < pduArray.length; ++i) {
+                messages.add(SmsMessage.createFromPdu((byte[]) pduArray[i]));
+            }
+
+            String sender = messages.get(0).getDisplayOriginatingAddress();
+            if (!validator.isValidNumber(sender)) {
+                this.abortBroadcast();
+                logger.AddLog("SMS from [" + sender + "] was blocked. Reason: " + validator.getReason());
+                logger.ShowLog();
             }
         }
     };

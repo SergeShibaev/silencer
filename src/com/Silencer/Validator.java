@@ -16,14 +16,12 @@ import java.util.Map;
  */
 public class Validator {
     private static final String[] blackList = { "^\\+372(.*)"/*, "^\\+282(.*)", "^01177(.*)"*/ };
-    private static Context context;
+    private static Context context = SilencerActivity.context;
     private String reason = "";
     private Map<String, Integer> silenceTime = new HashMap<String, Integer>();
 
-    public Validator(Context baseContext) {
-        this.context = baseContext;
-        silenceTime.put("start", 0);
-        silenceTime.put("finish", 9);
+    public Validator() {
+        setSilenceTime(0, 9);
         isTestsPassed();
     }
 
@@ -78,6 +76,11 @@ public class Validator {
         return (curHour >= silenceTime.get("start") && curHour <= silenceTime.get("finish"));
     }
 
+    public void setSilenceTime(int start, int finish) {
+        silenceTime.put("start", start);
+        silenceTime.put("finish", finish);
+    }
+
     public boolean isValidNumber(String incomingNumber) {
         if (incomingNumber == null) {
             reason = "Undefined caller";
@@ -92,6 +95,7 @@ public class Validator {
             return false;
         }
 
+        reason = "";
         return true;
     }
 }

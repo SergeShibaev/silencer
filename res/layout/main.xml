@@ -9,31 +9,29 @@
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:text="@string/title"
-              android:textStyle="bold"
               android:gravity="center_horizontal"
-              android:layout_marginBottom="10dip">
+              android:background="#fbffb3" android:textColor="#050505" android:textStyle="italic">
     </TextView>
     <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dip"
             android:fadingEdge="vertical"
             android:fadingEdgeLength="5dip" android:layout_marginTop="2dp">
         <Button
-                android:id="@+id/btnStart"
+                android:id="@+id/btnAction"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="onClickStart"
+                android:onClick="onClickAction"
                 android:text="@string/start">
         </Button>
-        <Button
-                android:id="@+id/btnStop"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:onClick="onClickStop"
-                android:text="@string/stop">
-        </Button>
     </LinearLayout>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/log_title"
+            android:id="@+id/textView" android:layout_gravity="center" android:textColor="#fffb0c"
+            />
     <ListView
             android:id="@+id/lvLog"
             android:layout_height="match_parent"

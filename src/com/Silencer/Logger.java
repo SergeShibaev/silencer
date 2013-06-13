@@ -20,9 +20,9 @@ import java.util.Collections;
  */
 public class Logger {
     private static final String logFileName = "calls.txt";
-    private Context context;
-    private ListView lv;
-    private int resourceId;
+    private static Context context;
+    private static ListView lv;
+    private static int resourceId;
 
     public Logger(Context baseContext, ListView logWindow, int resId) {
         this.context = baseContext;
@@ -37,9 +37,10 @@ public class Logger {
                 calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
     }
 
-    public void AddLog(String logString) {
+    public static void AddLog(String logString) {
         try {
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(SilencerActivity.getLogFileName(), context.MODE_APPEND)));
+            OutputStreamWriter sw = new OutputStreamWriter(context.openFileOutput(logFileName, context.MODE_APPEND));
+            BufferedWriter writer = new BufferedWriter(sw);
             writer.write(String.format("[%s] %s\n", NowAsStr(), logString));
             writer.close();
         } catch (Exception e) {
@@ -47,7 +48,7 @@ public class Logger {
         }
     }
 
-    public void ShowLog() {
+    public static void ShowLog() {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(context.openFileInput(logFileName)));
             String str;
@@ -59,7 +60,7 @@ public class Logger {
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, resourceId, text);
             lv.setAdapter(adapter);
         } catch (Exception e) {
-
+            AddLog("LoggerException: " + e.getMessage());
         }
     }
 }

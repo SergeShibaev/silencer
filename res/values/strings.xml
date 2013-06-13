@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Silencer</string>
-    <string name="start">Start</string>
-    <string name="stop">Stop</string>
-    <string name="title">Choose action</string>
+    <string name="start">Start Silencer</string>
+    <string name="title">To start Silencer press the button below</string>
+    <string name="log_title">Recent activity</string>
 </resources>
