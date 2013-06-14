@@ -25,6 +25,7 @@ public class SilencerActivity extends Activity {
 
         title = (TextView) findViewById(R.id.txtTitle);
         action = (Button) findViewById(R.id.btnAction);
+
         if (Silencer.isActive) {
             action.setText("Stop Silencer");
             title.setText("Silencer is active. You can hide this window");

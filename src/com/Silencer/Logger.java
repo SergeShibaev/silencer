@@ -4,10 +4,7 @@ import android.content.Context;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -37,7 +34,7 @@ public class Logger {
                 calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
     }
 
-    public static void AddLog(String logString) {
+    public void AddLog(String logString) {
         try {
             OutputStreamWriter sw = new OutputStreamWriter(context.openFileOutput(logFileName, context.MODE_APPEND));
             BufferedWriter writer = new BufferedWriter(sw);
@@ -48,8 +45,12 @@ public class Logger {
         }
     }
 
-    public static void ShowLog() {
+    public void ShowLog() {
         try {
+            File logFile = context.getFileStreamPath(logFileName);
+            if (!logFile.exists()) {
+                return;
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(context.openFileInput(logFileName)));
             String str;
             ArrayList<String> text = new ArrayList<String>();

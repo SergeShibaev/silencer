@@ -13,6 +13,6 @@ import android.content.Intent;
 public class AutorunManager extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        context.startService(new Intent(context, SilencerActivity.class));
+        context.startService(new Intent(context, Silencer.class));
     }
 }
